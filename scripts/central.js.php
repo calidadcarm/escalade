@@ -36,7 +36,7 @@ if ($_SESSION['glpiactiveprofile']['interface'] == "central"
                      }
 
                      //prepare a span element to load new elements
-                     $(this).prepend("<span id='escalade_block" + suffix + "'>test</span>");
+                     $(this).prepend("<span id='escalade_block" + suffix + "'></span>");
 
                      //ajax request
                      $("#escalade_block" + suffix).load('../plugins/escalade/ajax/central.php');

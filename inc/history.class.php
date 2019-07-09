@@ -32,7 +32,13 @@ class PluginEscaladeHistory extends CommonDBTM {
 
    static function getHistory($tickets_id, $full_history = false) {
       global $CFG_GLPI;
-
+	  
+	  // INICIO CRI : evitar errores por GET
+      if (!is_numeric($tickets_id)) { 
+		$tickets_id = 0; 
+	  } 
+	  // FIN
+	  
       $filter_groups_id = array();
       if ($_SESSION['plugins']['escalade']['config']['use_filter_assign_group']) {
       	$groups_groups = new PluginEscaladeGroup_Group();
@@ -245,6 +251,8 @@ class PluginEscaladeHistory extends CommonDBTM {
          echo "<br />";
       }
 
+
    }
+
 
 }

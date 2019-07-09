@@ -154,3 +154,4 @@ function plugin_escalade_check_config($verbose=false) {
    }
    return false;
 }
+?>
