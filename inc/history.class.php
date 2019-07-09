@@ -41,12 +41,20 @@ class PluginEscaladeHistory extends CommonDBTM {
 
    static function getFullHistory($tickets_id) {
       $history = new self();
+
       return $history->find(['tickets_id' => $tickets_id], "date_mod DESC");
    }
 
 
    static function getHistory($tickets_id, $full_history = false) {
       global $CFG_GLPI;
+	  
+	  // INICIO CRI : evitar errores por GET
+      if (!is_numeric($tickets_id)) { 
+		$tickets_id = 0; 
+	  } 
+	  // FIN
+	  
 
       $filter_groups_id = [];
       if ($_SESSION['plugins']['escalade']['config']['use_filter_assign_group']) {
@@ -63,6 +71,7 @@ class PluginEscaladeHistory extends CommonDBTM {
       $group = new Group();
 
       $history = new self();
+
       $found = $history->find(['tickets_id' => $tickets_id], "date_mod DESC");
       $nb_histories = count($found);
 
@@ -72,6 +81,7 @@ class PluginEscaladeHistory extends CommonDBTM {
       if ($full_history) {
          //show 1st group
          echo "<div class='escalade_active'>";
+
          echo "&nbsp;<i class='fas fa-users></i>'&nbsp;";
          if ($group->getFromDB($first_group['groups_id'])) {
             echo $group->getLink(true);
@@ -98,6 +108,7 @@ class PluginEscaladeHistory extends CommonDBTM {
          }
 
          //group link
+
          echo "&nbsp;<i class='fas fa-users'></i>&nbsp;";
          if ($group->getFromDB($hline['groups_id'])) {
             echo self::showGroupLink($group, $full_history);
@@ -106,6 +117,7 @@ class PluginEscaladeHistory extends CommonDBTM {
          echo "</div>";
 
          $i++;
+
          if ($i == self::HISTORY_LIMIT && !$full_history) {
             break;
          }
@@ -132,10 +144,12 @@ class PluginEscaladeHistory extends CommonDBTM {
       $link_item = $group->getFormURL();
 
       $link  = $link_item;
+
       $link .= (strpos($link, '?') ? '&amp;':'?').'id=' . $group->fields['id'];
       $link .= ($group->isTemplate() ? "&amp;withtemplate=1" : "");
 
       echo "<a href='$link'";
+
       if ($full_history) {
          echo " onclick='self.opener.location.href=\"$link\"; self.close();'";
       }
@@ -153,10 +167,12 @@ class PluginEscaladeHistory extends CommonDBTM {
       if (! Session::haveRight("ticket", Ticket::READALL)
           && ! Session::haveRight("ticket", Ticket::READASSIGN)
           && ! Session::haveRight("ticket", CREATE)
+
           && ! Session::haveRight("ticketvalidation", TicketValidation::VALIDATEREQUEST
                                                       & TicketValidation::VALIDATEINCIDENT)) {
          return false;
       }
+
 
       $groups     = implode("','", $_SESSION['glpigroups']);
       $numrows    = 0;
@@ -196,12 +212,14 @@ class PluginEscaladeHistory extends CommonDBTM {
 
       $query .= "WHERE $is_deleted AND ( $search_assign )
                   AND (`status` IN ($status))".
+
                   getEntitiesRestrictRequest("AND", "glpi_tickets");
 
       $query  .= " ORDER BY glpi_tickets.date_mod DESC";
 
       $result  = $DB->query($query);
       $numrows = $DB->numrows($result);
+
       if (!$numrows) {
          return;
       }
@@ -231,6 +249,7 @@ class PluginEscaladeHistory extends CommonDBTM {
             $options['criteria'][1]['link']       = 'AND';
          }
 
+
          $options['criteria'][2]['field']      = 8; // groups_id_assign
          if ($type == 'notold') {
             $options['criteria'][2]['searchtype'] = 'notequals';
@@ -243,6 +262,7 @@ class PluginEscaladeHistory extends CommonDBTM {
          echo "<table class='tab_cadrehov' id='pluginEscaladeCentralList'>";
          echo "<tr><th colspan='5'>";
          echo "<a href=\"".$CFG_GLPI["root_doc"]."/front/ticket.php?".
+
                          Toolbox::append_params($options, '&amp;')."\">".
                          Html::makeTitle($title, $number, $numrows)."</a>";
          echo "</th></tr>";
@@ -253,6 +273,7 @@ class PluginEscaladeHistory extends CommonDBTM {
             echo "<th>".__('Requester')."</th>";
             echo "<th>".__('Associated element')."</th>";
             echo "<th>".__('Description')."</th></tr>";
+
             for ($i = 0; $i < $number; $i++) {
                $ID = $DB->result($result, $i, "id");
                Ticket::showVeryShort($ID, 'Ticket$2');
@@ -261,5 +282,7 @@ class PluginEscaladeHistory extends CommonDBTM {
          echo "</table>";
          echo "<br />";
       }
+
    }
+
 }
